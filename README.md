@@ -1,0 +1,3 @@
+# Rust fearless concurrency demo
+
+One of the goals of Rust is to promote ["fearless concurrency"](https://doc.rust-lang.org/book/ch16-00-concurrency.html). This repository demonstrates how Rust's memory safety guarantees underpin this goal. With creative use of the type system, many risky patterns become compile-time errors. The repository is a series of commits starting with a single-threaded program to read and sum numbers from files. Each commit takes a step towards a fully multi-threaded version, with its commit message trying to explain what is happening. Some commits contain errors that shows how the Rust compiler refuses to compile code that risks concurrency issues.
