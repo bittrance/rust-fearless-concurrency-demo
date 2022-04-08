@@ -18,9 +18,14 @@ fn update(sums: &mut [usize], input: File) {
 fn main() {
     let mut sums = [0usize; 10];
     let files_names = args().into_iter().skip(1);
-    for name in files_names {
-        let input = File::open(name).unwrap();
-        update(&mut sums, input);
-    }
+    let handles = files_names.map(|name| {
+        std::thread::spawn(|| {
+            let input = File::open(name).unwrap();
+            update(&mut sums, input);
+        })
+    });
+    handles.for_each(|h| {
+        h.join().unwrap();
+    });
     println!("{:?}", sums);
 }
