@@ -28,7 +28,7 @@ fn main() {
     let mut sums: [MyUsize; 10] = Default::default();
     let files_names = args().into_iter().skip(1);
     let handles = files_names.map(|name| {
-        std::thread::spawn(|| {
+        std::thread::spawn(move || {
             let input = File::open(name).unwrap();
             update(&mut sums, input);
         })
