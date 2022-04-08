@@ -2,7 +2,7 @@ use std::env::args;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::AddAssign;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Default)]
 struct MyUsize(usize);
@@ -12,13 +12,13 @@ impl AddAssign for MyUsize {
     }
 }
 
-fn update(sums: &mut Arc<[MyUsize; 10]>, input: File) {
+fn update(sums: &mut Arc<[Mutex<MyUsize>; 10]>, input: File) {
     let reader = BufReader::new(input);
     for line in reader.lines().map(Result::unwrap) {
         if let Some((key_str, val_str)) = line.split_once(',') {
             let key: usize = key_str.parse().unwrap();
             let val: usize = val_str.parse().unwrap();
-            sums[key] += MyUsize(val);
+            *sums[key].lock().unwrap() += MyUsize(val);
         } else {
             panic!("Bad line: {}", line);
         }
@@ -26,7 +26,7 @@ fn update(sums: &mut Arc<[MyUsize; 10]>, input: File) {
 }
 
 fn main() {
-    let sums: Arc<[MyUsize; 10]> = Default::default();
+    let sums: Arc<[Mutex<MyUsize>; 10]> = Default::default();
     let files_names = args().into_iter().skip(1);
     let handles = files_names.map(|name| {
         let mut sums = Arc::clone(&sums);
