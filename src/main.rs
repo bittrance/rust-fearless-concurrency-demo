@@ -11,21 +11,25 @@ impl AddAssign for MyUsize {
     }
 }
 
+fn update(sums: &mut [MyUsize], input: File) {
+    let reader = BufReader::new(input);
+    for line in reader.lines().map(Result::unwrap) {
+        if let Some((key_str, val_str)) = line.split_once(',') {
+            let key: usize = key_str.parse().unwrap();
+            let val: usize = val_str.parse().unwrap();
+            sums[key] += MyUsize(val);
+        } else {
+            panic!("Bad line: {}", line);
+        }
+    }
+}
+
 fn main() {
     let mut sums: [MyUsize; 10] = Default::default();
     let files_names = args().into_iter().skip(1);
     for name in files_names {
         let input = File::open(name).unwrap();
-        let reader = BufReader::new(input);
-        for line in reader.lines().map(Result::unwrap) {
-            if let Some((key_str, val_str)) = line.split_once(',') {
-                let key: usize = key_str.parse().unwrap();
-                let val: usize = val_str.parse().unwrap();
-                sums[key] += MyUsize(val);
-            } else {
-                panic!("Bad line: {}", line);
-            }
-        }
+        update(&mut sums, input);
     }
     println!("{:?}", sums);
 }
