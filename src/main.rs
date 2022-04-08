@@ -2,6 +2,7 @@ use std::env::args;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::AddAssign;
+use std::sync::Arc;
 
 #[derive(Debug, Default)]
 struct MyUsize(usize);
@@ -11,7 +12,7 @@ impl AddAssign for MyUsize {
     }
 }
 
-fn update(sums: &mut [MyUsize], input: File) {
+fn update(sums: &mut Arc<[MyUsize; 10]>, input: File) {
     let reader = BufReader::new(input);
     for line in reader.lines().map(Result::unwrap) {
         if let Some((key_str, val_str)) = line.split_once(',') {
@@ -25,9 +26,10 @@ fn update(sums: &mut [MyUsize], input: File) {
 }
 
 fn main() {
-    let mut sums: [MyUsize; 10] = Default::default();
+    let sums: Arc<[MyUsize; 10]> = Default::default();
     let files_names = args().into_iter().skip(1);
     let handles = files_names.map(|name| {
+        let mut sums = Arc::clone(&sums);
         std::thread::spawn(move || {
             let input = File::open(name).unwrap();
             update(&mut sums, input);
