@@ -1,8 +1,9 @@
 use std::env::args;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::sync::Arc;
 
-fn update(sums: &mut [usize], input: File) {
+fn update(sums: &mut Arc<[usize; 10]>, input: File) {
     let reader = BufReader::new(input);
     for row in reader.lines().map(Result::unwrap) {
         if let Some((key_str, val_str)) = row.split_once(',') {
@@ -16,9 +17,10 @@ fn update(sums: &mut [usize], input: File) {
 }
 
 fn main() {
-    let mut sums = [0usize; 10];
+    let sums: Arc<[usize; 10]> = Default::default();
     let files_names = args().into_iter().skip(1);
     let handles = files_names.map(|name| {
+        let mut sums = Arc::clone(&sums);
         std::thread::spawn(move || {
             let input = File::open(name).unwrap();
             update(&mut sums, input);
